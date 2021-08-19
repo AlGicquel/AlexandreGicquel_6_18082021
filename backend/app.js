@@ -25,7 +25,7 @@ app.post('/api/sauces', (req, res, next) => {
     const sauce = new Sauce({
       ...req.body
     });
-    thing.save()
+    sauce.save()
       .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
       .catch(error => res.status(400).json({ error }));
 });
