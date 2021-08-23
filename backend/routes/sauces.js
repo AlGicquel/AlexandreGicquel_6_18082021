@@ -1,4 +1,3 @@
-const Sauce = require('../models/sauce');
 const express = require('express');
 const sauceCtrl = require('../controllers/sauces')
 const router = express.Router();
