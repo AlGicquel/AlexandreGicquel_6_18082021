@@ -66,6 +66,48 @@ exports.getAllSauces = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
 };
 
+exports.likeSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+            if (req.body.like === 1) {
+                if (!sauce.usersLiked.includes(req.body.userId)){
+                    sauce.usersLiked.push(''+req.body.userId);
+                    sauce.likes = sauce.usersLiked.length;
+                    sauce.dislikes = sauce.usersDisliked.length;
+                }
+            } else if (req.body.like === 0) {
+                if (sauce.usersLiked.includes(req.body.userId)){
+                    for (let i=0; i<sauce.usersLiked.length; i++) {
+                        if (sauce.usersLiked[i] === req.body.userId) {
+                            sauce.usersLiked.splice(i,1);
+                            sauce.likes = sauce.usersLiked.length;
+                            sauce.dislikes = sauce.usersDisliked.length;
+                        }
+                    }
+                } else if (sauce.usersDisliked.includes(req.body.userId)){
+                    for (let i=0; i<sauce.usersDisliked.length; i++) {
+                        if (sauce.usersDisliked[i] === req.body.userId) {
+                            sauce.usersDisliked.splice(i,1);
+                            sauce.likes = sauce.usersLiked.length;
+                            sauce.dislikes = sauce.usersDisliked.length;
+                        }
+                    }
+                }
+            } else if (req.body.like === -1) {
+                if (!sauce.usersDisliked.includes(req.body.userId)){
+                    sauce.usersDisliked.push(''+req.body.userId);
+                    sauce.likes = sauce.usersLiked.length;
+                    sauce.dislikes = sauce.usersDisliked.length;
+                }
+            }
+            // Sauce.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id })
+            Sauce.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id, likes: sauce.likes, dislikes: sauce.dislikes, usersDisliked: sauce.usersDisliked, usersLiked: sauce.usersLiked })
+                .then(() => res.status(200).json({ message: "sauce modifiée" }))
+                .catch(error => res.status(400).json({ error }));
+        })
+        .catch(error => console.log(error));
+}
+
 function verifyInput (req) {
     const test = /[A-Za-z éèçàêëñöùä\-]/;
     if (
