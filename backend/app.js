@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+// const env = require('dotenv').config();
+const env = require('dotenv').config();
 
-mongoose.connect('mongodb+srv://test:test@cluster0.bpzu0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+// mongoose.connect(`mongodb+srv://test:test@cluster0.bpzu0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+mongoose.connect(`mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.bpzu0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
 { useNewUrlParser: true,
   useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))

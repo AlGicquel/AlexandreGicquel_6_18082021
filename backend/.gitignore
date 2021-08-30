@@ -1,2 +1,4 @@
 node_modules
-images
+images/
+env/.env.dev
+env/.env.prod
