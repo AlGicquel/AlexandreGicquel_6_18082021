@@ -3,8 +3,9 @@ const fs = require('fs');
 
 // Fonction de création de sauce
 exports.createSauce = (req, res, next) => {
-    // vérification des input pour empécher les injections
-    if (verifyInput(req)) {
+    try {
+        // vérification des input pour empécher les injections
+        verifyInput(req);
         // Création de l'objet Sauce
         const thingObject = JSON.parse(req.body.sauce);
         delete thingObject._id;
@@ -20,6 +21,8 @@ exports.createSauce = (req, res, next) => {
         sauce.save()
             .then(() => res.status(201).json({ message: 'Sauce enregistrée !'}))
             .catch(error => res.status(500).json({ error }));
+    } catch (error) {
+        res.status(401).json({ error: error | "Données saisies invalides"});
     }
 };
 
@@ -32,8 +35,9 @@ exports.getOneSauce = (req, res, next) => {
 
 // Fonction de récupération d'un sauce
 exports.modifySauce = (req, res, next) => {
-    // Vérification des input
-    if (verifyInput(req)) {
+    try {
+        // Vérification des input
+        verifyInput(req);
         // On récupère déja l'objet qu'on veut modifer pour pouvoir supprimer l'image qui lui est associée s'il faut la changer
         Sauce.findOne({ _id: req.params.id })
             .then(sauce => {
@@ -54,6 +58,8 @@ exports.modifySauce = (req, res, next) => {
                     .catch(error => res.status(400).json({ error }));
             })
             .catch(error => res.status(501).json({ error }));
+    } catch (error) {
+        res.status(401).json({ error: error | "Données saisies invalides"});
     }
     
 }
@@ -92,14 +98,14 @@ exports.likeSauce = (req, res, next) => {
                 // On vérifie d'abord si son userId ne l'a pas déjà liké
                 if (!sauce.usersLiked.includes(req.body.userId)){
                     // Si ce n'est pas le cas on push son userId a la liste et on met à jour le nombre de likes et dislikes
-                    sauce.usersLiked.push(''+req.body.userId);
+                    sauce.usersLiked.push(req.body.userId);
                     sauce.likes = sauce.usersLiked.length;
                     sauce.dislikes = sauce.usersDisliked.length;
                 }
             // On fait la même chose en cas de dislike
             } else if (req.body.like === -1) {
                 if (!sauce.usersDisliked.includes(req.body.userId)){
-                    sauce.usersDisliked.push(''+req.body.userId);
+                    sauce.usersDisliked.push(req.body.userId);
                     sauce.likes = sauce.usersLiked.length;
                     sauce.dislikes = sauce.usersDisliked.length;
                 }
@@ -126,8 +132,7 @@ exports.likeSauce = (req, res, next) => {
                     }
                 }
             }
-            // Sauce.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id })
-            Sauce.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id, likes: sauce.likes, dislikes: sauce.dislikes, usersDisliked: sauce.usersDisliked, usersLiked: sauce.usersLiked })
+            Sauce.updateOne({ _id: req.params.id }, sauce )
                 .then(() => res.status(200).json({ message: "sauce modifiée" }))
                 .catch(error => res.status(400).json({ error }));
         })
@@ -136,15 +141,17 @@ exports.likeSauce = (req, res, next) => {
 
 // Fonction de cérification des dislikes
 function verifyInput (req) {
-    const test = /[A-Za-z éèçàêëñöùä\-]/;
+    const testInput = /[A-Za-z éèçàêëñöùä\-]$/;
+    console.log(testInput.test(req.body.name));
+    console.log(testInput.test(req.body.manufacturer));
+    console.log(testInput.test(req.body.description));
+    console.log(testInput.test(req.body.mainPepper));
     if (
-        test.test(req.body.name) &&
-        test.test(req.body.manufacturer) &&
-        test.test(req.body.description) &&
-        test.test(req.body.mainPepper) 
+        !testInput.test(req.body.name) ||
+        !testInput.test(req.body.manufacturer) ||
+        !testInput.test(req.body.description) ||
+        !testInput.test(req.body.mainPepper) 
     ) {
-        return true;
-    } else {
-        return false;
+        throw 'Données saisies invalides';
     }
 }

@@ -7,7 +7,6 @@ require('dotenv').config();
 // Fonction d'inscription
 exports.signup = (req, res, next) => {
   // On vérifie les inputs
-  // if (verifyInput(req)) {
   try {
     verifyInput(req);
     // On crypt le mot de passe avec bcrypt
@@ -24,7 +23,7 @@ exports.signup = (req, res, next) => {
       })
       .catch(error => res.status(500).json({ error }));
   }
-  catch {
+  catch (error) {
     res.status(401).json({ error: error | "Données saisies invalides"});
   }
 };
@@ -32,7 +31,6 @@ exports.signup = (req, res, next) => {
 // Fonction de connection
 exports.login = (req, res, next) => {
   // On vérifie les inputs
-  // if (verifyInput(req)) {
   try {
     verifyInput(req);
     // On cherche l'utilisateur dans la base de données à partir du mail
@@ -62,8 +60,8 @@ exports.login = (req, res, next) => {
           .catch(error => res.status(500).json({ error }));
       })
       .catch(error => res.status(500).json({ error }));
-  } catch {
-    res.status(401).json({ error });
+  } catch (error) {
+    res.status(401).json({ error: error | "Données saisies invalides"});
   }
 };
 
